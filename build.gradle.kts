@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") apply false
 }
 
-
 subprojects {
     val libraryVersion: String by project
 
@@ -10,27 +9,34 @@ subprojects {
     version = libraryVersion
 
     apply(plugin = "maven-publish")
+    apply(plugin = "signing")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
         mavenCentral()
     }
 
+    configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
     configure<PublishingExtension> {
         repositories {
             maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/jacobtread/BlazeKt")
+                name = "Sonatype"
+                setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                val sonatypeUser: String? by project
+                val sonatypeKey: String? by project
                 credentials {
-                    username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
-                    password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+                    username = sonatypeUser
+                    password = sonatypeKey
                 }
             }
         }
-        publications {
-            register<MavenPublication>("gpr") {
-                from(components["java"])
-            }
-        }
+    }
+
+    configure<SigningExtension> {
+        useGpgCmd()
     }
 }
