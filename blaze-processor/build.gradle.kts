@@ -1,10 +1,6 @@
-plugins {
-    kotlin("jvm")
-}
-
 dependencies {
     // The blaze project for annotations
-    implementation(project(":annotations"))
+    implementation(project(":blaze-annotations"))
 
     // Symbol processing api for annotation processing
     val kspVersion: String by project

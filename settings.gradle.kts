@@ -4,7 +4,6 @@ pluginManagement {
         kotlin("jvm") version kotlinVersion
     }
     repositories {
-        gradlePluginPortal()
         mavenCentral()
     }
 }
@@ -12,4 +11,8 @@ pluginManagement {
 
 rootProject.name = "blaze"
 
-include("core", "annotations", "processor")
+include(
+    "blaze-core",
+    "blaze-annotations",
+    "blaze-processor"
+)
