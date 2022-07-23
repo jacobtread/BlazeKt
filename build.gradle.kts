@@ -3,7 +3,7 @@ plugins {
 }
 
 
-allprojects {
+subprojects {
     val libraryVersion: String by project
 
     group = "com.jacobtread.blaze"
