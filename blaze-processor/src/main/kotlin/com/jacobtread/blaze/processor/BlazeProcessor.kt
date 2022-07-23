@@ -100,7 +100,7 @@ class BlazeProcessor(
             val routeFunc = FunSpec.builder("route${className}")
                 .addParameter("processor", classType)
                 .addParameter("channel", ClassName("io.netty.channel", "Channel"))
-                .addParameter("msg", ClassName("com.jacobtread.kme.blaze.packet", "Packet"))
+                .addParameter("msg", ClassName("com.jacobtread.blaze.packet", "Packet"))
                 .addCode(CodeBlock.of(codeBuilder.toString()))
                 .build()
             logger.info("Writing output for $className")
@@ -109,7 +109,7 @@ class BlazeProcessor(
             val file = FileSpec
                 .builder(clazz.packageName.asString(), "${className}RouterFunction")
                 // Import for respond extension function
-                .addImport("com.jacobtread.kme.blaze", "respond")
+                .addImport("com.jacobtread.blaze", "respond")
                 .addFunction(routeFunc)
                 .build()
             // Write the created file
