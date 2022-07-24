@@ -23,7 +23,7 @@ This is an implementation of the Blaze packet system in Kotlin
 
 **Groovy**:
 
-```kotlin
+```groovy
 
 repositories {
     mavenCentral()
