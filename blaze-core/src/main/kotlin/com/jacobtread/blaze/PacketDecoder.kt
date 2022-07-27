@@ -10,7 +10,7 @@ import io.netty.handler.codec.DecoderException
 
 class PacketDecoder : ChannelInboundHandlerAdapter() {
 
-    private var cumulation: ByteBuf? = null
+    private var accumulation: ByteBuf? = null
     private var first = false
     private var numReads = 0
     private var firedChannelRead = false
@@ -24,10 +24,10 @@ class PacketDecoder : ChannelInboundHandlerAdapter() {
         }
         selfFiredChannelRead = true
         try {
-            first = cumulation == null
-            val cumulation = mergeCumulate(ctx.alloc(), if (first) Unpooled.EMPTY_BUFFER else cumulation!!, msg)
-            this.cumulation = cumulation
-            if (decode(ctx, cumulation)) {
+            first = accumulation == null
+            val accumulation = mergeCumulate(ctx.alloc(), if (first) Unpooled.EMPTY_BUFFER else accumulation!!, msg)
+            this.accumulation = accumulation
+            if (decode(ctx, accumulation)) {
                 firedChannelRead = true
             }
         } catch (e: DecoderException) {
@@ -35,11 +35,11 @@ class PacketDecoder : ChannelInboundHandlerAdapter() {
         } catch (e: Exception) {
             throw DecoderException(e)
         } finally {
-            val cumulation = cumulation
+            val cumulation = accumulation
             if (cumulation != null && !cumulation.isReadable) {
                 numReads = 0
                 cumulation.release()
-                this.cumulation = null
+                this.accumulation = null
             } else if (++numReads >= 16) {
                 numReads = 0
                 discardSomeReadBytes()
@@ -95,7 +95,7 @@ class PacketDecoder : ChannelInboundHandlerAdapter() {
             val packet = LazyBufferPacket(component, command, error, qtype, id, content)
 
             if (PacketLogger.isEnabled) {
-                PacketLogger.logDebug("DECODED PACKET", ctx.channel(), packet)
+                PacketLogger.log("DECODED PACKET", ctx.channel(), packet)
             }
             ctx.fireChannelRead(packet)
             read = true
@@ -104,36 +104,36 @@ class PacketDecoder : ChannelInboundHandlerAdapter() {
     }
 
 
-    private fun mergeCumulate(alloc: ByteBufAllocator, cumulation: ByteBuf, input: ByteBuf): ByteBuf {
-        if (!cumulation.isReadable && input.isContiguous) {
-            cumulation.release()
+    private fun mergeCumulate(alloc: ByteBufAllocator, accumulation: ByteBuf, input: ByteBuf): ByteBuf {
+        if (!accumulation.isReadable && input.isContiguous) {
+            accumulation.release()
             return input
         }
         try {
             val required = input.readableBytes()
-            if (required > cumulation.maxWritableBytes()
-                || required > cumulation.maxFastWritableBytes() && cumulation.refCnt() > 1
-                || cumulation.isReadOnly
+            if (required > accumulation.maxWritableBytes()
+                || required > accumulation.maxFastWritableBytes() && accumulation.refCnt() > 1
+                || accumulation.isReadOnly
             ) {
-                val oldBytes = cumulation.readableBytes()
+                val oldBytes = accumulation.readableBytes()
                 val newBytes = input.readableBytes()
                 val totalBytes = oldBytes + newBytes
-                val newCumulation = alloc.buffer(alloc.calculateNewCapacity(totalBytes, Int.MAX_VALUE))
-                var toRelease = newCumulation
+                val newAccumulation = alloc.buffer(alloc.calculateNewCapacity(totalBytes, Int.MAX_VALUE))
+                var toRelease = newAccumulation
                 try {
-                    newCumulation.setBytes(0, cumulation, cumulation.readerIndex(), oldBytes)
+                    newAccumulation.setBytes(0, accumulation, accumulation.readerIndex(), oldBytes)
                         .setBytes(oldBytes, input, input.readerIndex(), newBytes)
                         .writerIndex(totalBytes)
                     input.readerIndex(input.writerIndex())
-                    toRelease = cumulation
-                    return newCumulation
+                    toRelease = accumulation
+                    return newAccumulation
                 } finally {
                     toRelease.release()
                 }
             }
-            cumulation.writeBytes(input, input.readerIndex(), required)
+            accumulation.writeBytes(input, input.readerIndex(), required)
             input.readerIndex(input.writerIndex())
-            return cumulation
+            return accumulation
         } finally {
             input.release()
         }
@@ -151,9 +151,9 @@ class PacketDecoder : ChannelInboundHandlerAdapter() {
     }
 
     private fun discardSomeReadBytes() {
-        val cumulation = cumulation
-        if (cumulation != null && !first && cumulation.refCnt() == 1) {
-            cumulation.discardSomeReadBytes()
+        val accumulation = accumulation
+        if (accumulation != null && !first && accumulation.refCnt() == 1) {
+            accumulation.discardSomeReadBytes()
         }
     }
 }

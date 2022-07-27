@@ -10,7 +10,7 @@ interface Packet : TdfContainer {
     companion object {
         const val INCOMING_TYPE = 0x0000 // Packet type representing client -> server
         const val RESPONSE_TYPE = 0x1000 // Packet type representing a response to client -> server from server
-        const val UNIQUE_TYPE = 0x2000 // Packet type representing a server -> client message that's not a response
+        const val NOTIFY_TYPE = 0x2000 // Packet type representing a server -> client message that sends data to the client without being requested
         const val ERROR_TYPE = 0x3000 // Packet type representing a packet with an error
         const val NO_ERROR = 0 // No error error code
 
@@ -19,6 +19,7 @@ interface Packet : TdfContainer {
             val bufferSize = 12 + contentSize + (if (contentSize > 0xFFFF) 2 else 0)
             return alloc.ioBuffer(bufferSize, bufferSize)
         }
+
         fun release(packet: Packet) {
             if (packet is LazyBufferPacket) {
                 packet.release()

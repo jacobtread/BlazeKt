@@ -6,9 +6,9 @@ import com.jacobtread.blaze.packet.ComposedPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.packet.Packet.Companion.ERROR_TYPE
 import com.jacobtread.blaze.packet.Packet.Companion.INCOMING_TYPE
+import com.jacobtread.blaze.packet.Packet.Companion.NOTIFY_TYPE
 import com.jacobtread.blaze.packet.Packet.Companion.NO_ERROR
 import com.jacobtread.blaze.packet.Packet.Companion.RESPONSE_TYPE
-import com.jacobtread.blaze.packet.Packet.Companion.UNIQUE_TYPE
 
 /**
  * Alias for a function that initializes the contents of a TdfBuilder
@@ -17,6 +17,7 @@ import com.jacobtread.blaze.packet.Packet.Companion.UNIQUE_TYPE
 typealias ContentInitializer = TdfBuilder.() -> Unit
 
 inline fun clientPacket(component: Int, command: Int, id: Int, init: ContentInitializer): Packet = initializePacket(component, command, NO_ERROR, INCOMING_TYPE, id, init)
+inline fun clientPacket(component: Int, command: Int, id: Int): Packet = initializeEmptyPacket(component, command, NO_ERROR, INCOMING_TYPE, id)
 
 
 /**
@@ -38,7 +39,7 @@ inline fun Packet.respond(init: ContentInitializer): Packet = initializePacket(c
 inline fun Packet.respond(): Packet = initializeEmptyPacket(component, command, NO_ERROR, RESPONSE_TYPE, id)
 
 /**
- * unique Creates a packet that is not responding to any other packets
+ * notify Creates a packet that is not responding to any other packets
  * using the provided command and component, initializes the contents
  * using the provided content initializer
  *
@@ -47,21 +48,21 @@ inline fun Packet.respond(): Packet = initializeEmptyPacket(component, command, 
  * @param init The content initializer
  * @return The created packet
  */
-inline fun unique(
+inline fun notify(
     component: Int,
     command: Int,
     init: ContentInitializer,
-): Packet = initializePacket(component, command, NO_ERROR, UNIQUE_TYPE, 0x0, init)
+): Packet = initializePacket(component, command, NO_ERROR, NOTIFY_TYPE, 0x0, init)
 
 /**
- * unique Creates a packet that is not responding to any other packets
+ * notify Creates a packet that is not responding to any other packets
  * using the provided command and component
  *
  * @param component The component of the packet
  * @param command The command of the packet
  * @return The created packet
  */
-inline fun unique(component: Int, command: Int): Packet = initializeEmptyPacket(component, command, NO_ERROR, UNIQUE_TYPE, 0x0)
+inline fun notify(component: Int, command: Int): Packet = initializeEmptyPacket(component, command, NO_ERROR, NOTIFY_TYPE, 0x0)
 
 
 /**

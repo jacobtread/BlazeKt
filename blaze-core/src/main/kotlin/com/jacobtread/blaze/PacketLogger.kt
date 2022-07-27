@@ -1,5 +1,6 @@
 package com.jacobtread.blaze
 
+import com.jacobtread.blaze.PacketLogger.init
 import com.jacobtread.blaze.data.VarTripple
 import com.jacobtread.blaze.debug.BlazeLoggingOutput
 import com.jacobtread.blaze.debug.DebugNaming
@@ -8,32 +9,58 @@ import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.*
 import io.netty.channel.Channel
 
+/**
+ * Logger implementation for logging debug information
+ * about incoming and outgoing packets. [init]
+ *
+ * @constructor Create empty Packet logger
+ */
 object PacketLogger {
 
     private var debugComponentNames: Map<Int, String>? = null
     private var debugCommandNames: Map<Int, String>? = null
+    private var debugNotifyNames: Map<Int, String>? = null
+
     var output: BlazeLoggingOutput? = null
 
     var isEnabled: Boolean = false
 
+    /**
+     * Initialize the logger with the provided naming
+     * configuration and logging output pipe. This enables
+     * logging through this logger.
+     *
+     * @param naming The naming to use for packet commands and components
+     * @param output The logging output pipe
+     */
     fun init(
-        componentNames: DebugNaming,
-        commandNames: DebugNaming,
+        naming: DebugNaming,
         output: BlazeLoggingOutput?,
     ) {
-        debugComponentNames = componentNames.getDebugNameMap()
-        debugCommandNames = commandNames.getDebugNameMap()
+        debugComponentNames = naming.getComponentNames()
+        debugCommandNames = naming.getCommandNames()
+        debugNotifyNames = naming.getNotifyNames()
+
         this.output = output
         isEnabled = true
     }
 
-    fun logDebug(title: String, channel: Channel, packet: Packet) {
+    /**
+     * Logs a packet to the debug output using the provided [output]
+     * logging pipe.
+     *
+     * @param title The title of the message to log
+     * @param channel The channel the message was read from / written to used to retrieve the [PacketEncoder.ENCODER_CONTEXT_KEY]
+     * @param packet The packet to log
+     */
+    fun log(title: String, channel: Channel, packet: Packet) {
         try {
             val lineWidth = 30
             val out = StringBuilder()
             out.append(title)
                 .append(' ')
-                .appendLine("=".repeat(lineWidth - (title.length + 1)))
+            repeat(lineWidth - (title.length + 1)) { out.append('=') }
+            out.appendLine()
 
             val contextAttr: String? = channel.attr(PacketEncoder.ENCODER_CONTEXT_KEY)
                 .get()
@@ -41,20 +68,25 @@ object PacketLogger {
             if (contextAttr != null) {
                 out.appendLine(contextAttr)
             }
-
-
             createPacketSource(out, packet)
-
             out.appendLine()
-                .appendLine("=".repeat(lineWidth))
-
-            debug(out.toString())
+            repeat(lineWidth) {
+                out.append('=')
+            }
+            out.appendLine()
+            output?.debug(out.toString())
         } catch (e: Throwable) {
             dumpPacketException(packet, e)
         }
     }
 
-
+    /**
+     * Dumps the packet information in raw form. Used for when creating
+     * the source representation fails.
+     *
+     * @param packet The packet to dump
+     * @param cause The cause of the failure
+     */
     private fun dumpPacketException(packet: Packet, cause: Throwable) {
         try {
             val out = StringBuilder("Failed to decode packet contents for debugging: ")
@@ -68,7 +100,16 @@ object PacketLogger {
                 .append("Command: 0x")
                 .append(packet.command.toString(16))
                 .append(' ')
-                .append(debugCommandNames?.get((packet.component shl 16) + packet.command) ?: "UNKNOWN")
+            val isNotify = packet.type == Packet.NOTIFY_TYPE
+            val commandNameIndex = (packet.component shl 16) + packet.command
+            val commandName: String? = if (isNotify) {
+                debugNotifyNames?.get(commandNameIndex)
+                    ?: debugCommandNames?.get(commandNameIndex)
+            } else {
+                debugCommandNames?.get(commandNameIndex)
+            }
+            out
+                .append(commandName ?: "UNKNOWN")
                 .appendLine()
                 .append("Error: 0x")
                 .append(packet.error.toString(16))
@@ -78,7 +119,7 @@ object PacketLogger {
                     when (packet.type) {
                         Packet.INCOMING_TYPE -> "INCOMING"
                         Packet.ERROR_TYPE -> "ERROR"
-                        Packet.UNIQUE_TYPE -> "UNIQUE"
+                        Packet.NOTIFY_TYPE -> "NOTIFY"
                         Packet.RESPONSE_TYPE -> "RESPONSE"
                         else -> "UNKNOWN"
                     }
@@ -125,13 +166,20 @@ object PacketLogger {
 
             out.appendLine()
                 .appendLine("=====================================================")
-            warn(out.toString())
+            output?.warn(out.toString())
         } catch (e: Throwable) {
-            warn("Exception when handling packet dump exception", e)
+            output?.warn("Exception when handling packet dump exception", e)
         }
     }
 
-    fun createPacketSource(out: StringBuilder, packet: Packet): String {
+    /**
+     * Creates a human-readable representation of a packet. This representation
+     * closely represents the builder structure that is present in this library.
+     *
+     * @param out The string builder to append the created packet source to
+     * @param packet The packet to create the source for
+     */
+    fun createPacketSource(out: StringBuilder, packet: Packet) {
         out.append("packet(") // Initial opening packet tag
 
         val componentName = debugComponentNames?.get(packet.component)
@@ -146,7 +194,15 @@ object PacketLogger {
 
         out.append(", ")
 
-        val commandName = debugCommandNames?.get((packet.component shl 16) + packet.command)
+        val isNotify = packet.type == Packet.NOTIFY_TYPE
+        val commandNameIndex = (packet.component shl 16) + packet.command
+
+        val commandName: String? = if (isNotify) {
+            debugNotifyNames?.get(commandNameIndex)
+                ?: debugCommandNames?.get(commandNameIndex)
+        } else {
+            debugCommandNames?.get(commandNameIndex)
+        }
 
         if (commandName != null) {
             out.append("Commands.")
@@ -161,7 +217,7 @@ object PacketLogger {
         when (packet.type) {
             Packet.INCOMING_TYPE -> out.append("INCOMING_TYPE")
             Packet.RESPONSE_TYPE -> out.append("RESPONSE_TYPE")
-            Packet.UNIQUE_TYPE -> out.append("UNIQUE_TYPE")
+            Packet.NOTIFY_TYPE -> out.append("NOTIFY_TYPE")
             Packet.ERROR_TYPE -> out.append("ERROR_TYPE")
             else -> out.append("0x")
                 .append(packet.type.toString(16))
@@ -177,13 +233,31 @@ object PacketLogger {
         }
 
         out.append('}')
-        return out.toString()
     }
 
+    /**
+     * Appends the indentation level to the provided the string
+     * builder each level of [indent] is represented with two
+     * spaces
+     *
+     * @param out The string builder to append to
+     * @param indent The indent level
+     */
     private fun appendIndent(out: StringBuilder, indent: Int) {
-        out.append("  ".repeat(indent)) // Append indentation
+        repeat(indent) { // Append the indentation to output
+            out.append("  ")
+        }
     }
 
+    /**
+     * Creates a human-readable string representation of the provided tdf
+     * value in the form that closely resembles the tdf builder source
+     *
+     * @param out The string builder to append to
+     * @param indent The current source indentation level
+     * @param value The tdf value itself
+     * @param inline Whether this element is inline (e.g. inside a list)
+     */
     fun createTdfSource(out: StringBuilder, indent: Int, value: Tdf<*>, inline: Boolean) {
         appendIndent(out, indent)
         when (value) {
@@ -200,6 +274,7 @@ object PacketLogger {
                 }
                 out.append(')')
             }
+
             is FloatTdf -> {
                 out.append("float(\"")
                     .append(value.label)
@@ -207,6 +282,7 @@ object PacketLogger {
                     .append(value.value)
                     .append(')')
             }
+
             is GroupTdf -> {
                 if (!inline) out.append('+')
 
@@ -229,6 +305,7 @@ object PacketLogger {
                 appendIndent(out, indent)
                 out.append('}')
             }
+
             is ListTdf -> {
                 out.append("list(\"")
                     .append(value.label)
@@ -244,9 +321,11 @@ object PacketLogger {
                             else -> values.joinTo(out, ", ")
                         }
                     }
+
                     Tdf.STRING -> {
                         values.joinTo(out, ", ")
                     }
+
                     Tdf.TRIPPLE -> {
                         values.joinTo(out, ", ") {
                             val tripple = it as VarTripple
@@ -256,6 +335,7 @@ object PacketLogger {
                             "VarTripple(0x$a, 0x$b, 0x$c)"
                         }
                     }
+
                     Tdf.GROUP -> {
                         out.appendLine()
                         val size = values.size
@@ -269,12 +349,14 @@ object PacketLogger {
                         }
                         appendIndent(out, indent)
                     }
+
                     else -> values.joinTo(out, ", ") { it.javaClass.simpleName }
                 }
                 out.append("))")
 
 
             }
+
             is MapTdf -> {
                 val map = value.value
                 out.append("map(\"")
@@ -286,6 +368,7 @@ object PacketLogger {
                         is String -> out.append('"')
                             .append(mapKey)
                             .append('"')
+
                         is ULong -> out.append("0x").append(mapKey.toString(16))
                         is UInt -> out.append("0x").append(mapKey.toString(16))
                         is Long -> out.append("0x").append(mapKey.toString(16))
@@ -296,6 +379,7 @@ object PacketLogger {
                         is String -> out.append('"')
                             .append(mapValue)
                             .append('"')
+
                         is ULong -> out.append("0x").append(mapValue.toString(16))
                         is UInt -> out.append("0x").append(mapValue.toString(16))
                         is Long -> out.append("0x").append(mapValue.toString(16))
@@ -308,6 +392,7 @@ object PacketLogger {
                 appendIndent(out, indent)
                 out.append("))")
             }
+
             is OptionalTdf -> {
                 val content = value.value
                 out.append("optional(\"")
@@ -329,6 +414,7 @@ object PacketLogger {
                     out.append(", null)")
                 }
             }
+
             is PairTdf -> {
                 val pair = value.value
                 out.append("pair(\"")
@@ -339,6 +425,7 @@ object PacketLogger {
                     .append(pair.b.toString(16))
                     .append(')')
             }
+
             is StringTdf -> {
                 out.append("text(\"")
                     .append(value.label)
@@ -353,6 +440,7 @@ object PacketLogger {
                 }
                 out.append(')')
             }
+
             is TrippleTdf -> {
                 val tripple = value.value
                 out.append("tripple(\"")
@@ -365,6 +453,7 @@ object PacketLogger {
                     .append(tripple.c.toString(16))
                     .append(')')
             }
+
             is VarIntListTdf -> {
                 out.append("varList(\"")
                     .append(value.label)
@@ -376,6 +465,7 @@ object PacketLogger {
                 }
                 out.append("))")
             }
+
             is VarIntTdf -> {
                 out.append("number(\"")
                     .append(value.label)
@@ -386,22 +476,23 @@ object PacketLogger {
         }
     }
 
-    fun debug(text: String) {
-        output?.debug(text)
-    }
-
-    fun warn(text: String) {
-        output?.warn(text)
-    }
-
-    fun warn(text: String, cause: Throwable) {
-        output?.warn(text, cause)
-    }
-
+    /**
+     * Logs an error without an exception to
+     * the logging pipe
+     *
+     * @param text The error text
+     */
     fun error(text: String) {
         output?.error(text)
     }
 
+    /**
+     * Logs and error with an exception to
+     * the logging pipe
+     *
+     * @param text The error text
+     * @param cause The thrown exception
+     */
     fun error(text: String, cause: Throwable) {
         output?.error(text, cause)
     }

@@ -2,7 +2,8 @@ package com.jacobtread.blaze
 
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import io.netty.buffer.Unpooled
-import kotlin.io.path.*
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * main Simple program takes all the content from the replays' directory
@@ -10,17 +11,17 @@ import kotlin.io.path.*
  * variants into the decoded directory
  */
 fun main() {
-    val dir = Path("data/replay")
-    val decodedDir = dir / "decoded"
+    val dir = Paths.get("data/replay")
+    val decodedDir = dir.resolve("decoded")
 
-    if (!decodedDir.exists()) decodedDir.createDirectories()
-    dir.forEachDirectoryEntry {
+    if (Files.notExists(decodedDir)) Files.createDirectories(decodedDir)
+    Files.newDirectoryStream(dir).forEach {
         if (it.fileName.toString().endsWith(".bin")) {
-            val outFile = decodedDir / "${it.fileName}.txt"
-            val outFileRaw = decodedDir / "${it.fileName}.raw.txt"
-            if (!outFile.exists()) outFile.createFile()
+            val outFile = decodedDir.resolve("${it.fileName}.txt")
+            val outFileRaw = decodedDir.resolve("${it.fileName}.raw.txt")
+            if (Files.notExists(outFile)) Files.createFile(outFile)
             val outBuilder = StringBuilder()
-            val contents = it.readBytes()
+            val contents = Files.readAllBytes(it)
             val buffer = Unpooled.wrappedBuffer(contents)
             val bufferRaw = StringBuilder()
             while (buffer.readableBytes() > 0) {
@@ -61,8 +62,8 @@ fun main() {
                 }
             }
             buffer.readerIndex(0)
-            outFile.writeText(outBuilder.toString())
-            outFileRaw.writeText(bufferRaw.toString())
+            Files.writeString(outFile, outBuilder.toString())
+            Files.writeString(outFileRaw, bufferRaw.toString())
         }
     }
 }

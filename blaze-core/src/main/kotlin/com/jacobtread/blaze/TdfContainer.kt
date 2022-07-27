@@ -2,8 +2,6 @@
 
 package com.jacobtread.blaze
 
-import com.jacobtread.blaze.InvalidTdfException
-import com.jacobtread.blaze.MissingTdfException
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTripple
 import com.jacobtread.blaze.tdf.*

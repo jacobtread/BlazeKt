@@ -23,7 +23,7 @@ object PacketEncoder : ChannelOutboundHandlerAdapter() {
                 buffer = Packet.allocateBuffer(ctx.alloc(), msg)
                 try {
                     if (PacketLogger.isEnabled) {
-                        PacketLogger.logDebug("ENCODED PACKET", ctx.channel(), msg)
+                        PacketLogger.log("ENCODED PACKET", ctx.channel(), msg)
                     }
                     msg.writeTo(buffer)
                     ctx.flush()
@@ -48,5 +48,4 @@ object PacketEncoder : ChannelOutboundHandlerAdapter() {
             buffer?.release()
         }
     }
-
 }

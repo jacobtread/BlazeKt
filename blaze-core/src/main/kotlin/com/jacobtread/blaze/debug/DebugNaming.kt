@@ -1,5 +1,7 @@
 package com.jacobtread.blaze.debug
 
 interface DebugNaming {
-    fun getDebugNameMap(): Map<Int, String>
+    fun getComponentNames(): Map<Int, String>
+    fun getCommandNames(): Map<Int, String>
+    fun getNotifyNames(): Map<Int, String>
 }
