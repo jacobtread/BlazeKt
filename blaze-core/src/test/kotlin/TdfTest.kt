@@ -55,9 +55,9 @@ internal class TdfTest {
         private val PairGen: Generator<VarPair> = { VarPair(ULongGen(), ULongGen()) }
         private val FloatGen: Generator<Float> = { Random.nextFloat() }
 
-        private val VarIntTdfGen: Generator<VarIntTdf> = {
+        private val VarIntTdfGen: Generator<VarIntTdf<*>> = {
             val value = LabelGen()
-            VarIntTdf(value, ULongGen())
+            ULongTdf(value, ULongGen())
         }
         private val StringTdfGen: Generator<StringTdf> = {
             StringTdf(LabelGen(), StringGen())
