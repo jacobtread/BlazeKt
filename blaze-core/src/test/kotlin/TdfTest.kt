@@ -1,6 +1,7 @@
 import com.jacobtread.blaze.tdf.*
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTriple
+import com.jacobtread.blaze.tdf.types.*
 import io.netty.buffer.Unpooled
 import kotlin.random.Random
 import kotlin.random.nextInt

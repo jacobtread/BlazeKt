@@ -3,10 +3,10 @@ package com.jacobtread.blaze
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTriple
 import com.jacobtread.blaze.tdf.*
-import com.jacobtread.blaze.tdf.int.ByteTdf
-import com.jacobtread.blaze.tdf.int.ShortTdf
-import com.jacobtread.blaze.tdf.int.UByteTdf
-import com.jacobtread.blaze.tdf.int.ULongTdf
+import com.jacobtread.blaze.tdf.types.ByteTdf
+import com.jacobtread.blaze.tdf.types.ShortTdf
+import com.jacobtread.blaze.tdf.types.ULongTdf
+import com.jacobtread.blaze.tdf.types.*
 
 /**
  * TdfBuilder Builder class used to create Tdf structures easily

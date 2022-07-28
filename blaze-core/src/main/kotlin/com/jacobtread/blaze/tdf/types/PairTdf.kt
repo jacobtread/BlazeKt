@@ -1,6 +1,8 @@
-package com.jacobtread.blaze.tdf
+package com.jacobtread.blaze.tdf.types
 
 import com.jacobtread.blaze.data.VarPair
+import com.jacobtread.blaze.tdf.Tdf
+import com.jacobtread.blaze.tdf.TdfReadable
 import io.netty.buffer.ByteBuf
 
 class PairTdf(label: String, override val value: VarPair) : Tdf<VarPair>(label, PAIR) {

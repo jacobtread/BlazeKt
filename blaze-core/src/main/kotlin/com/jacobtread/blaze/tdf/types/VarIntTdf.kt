@@ -1,10 +1,11 @@
-package com.jacobtread.blaze.tdf.int
+package com.jacobtread.blaze.tdf.types
 
 import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.TdfReadable
+import com.jacobtread.blaze.tdf.VarIntConversion
 import io.netty.buffer.ByteBuf
 
-sealed class VarIntTdf<T>(label: String) : Tdf<T>(label, VARINT) {
+sealed class VarIntTdf<T>(label: String) : Tdf<T>(label, VARINT), VarIntConversion {
 
     companion object : TdfReadable<VarIntTdf<*>> {
         override fun read(label: String, input: ByteBuf): VarIntTdf<*> {
@@ -30,15 +31,5 @@ sealed class VarIntTdf<T>(label: String) : Tdf<T>(label, VARINT) {
     override fun hashCode(): Int {
         return label.hashCode()
     }
-
-    abstract fun toByte(): Byte
-    abstract fun toInt(): Int
-    abstract fun toShort(): Short
-    abstract fun toLong(): Long
-
-    abstract fun toUByte(): UByte
-    abstract fun toUInt(): UInt
-    abstract fun toUShort(): UShort
-    abstract fun toULong(): ULong
 
 }

@@ -1,4 +1,4 @@
-package com.jacobtread.blaze.tdf.int
+package com.jacobtread.blaze.tdf.types
 
 import io.netty.buffer.ByteBuf
 
@@ -20,14 +20,12 @@ class ByteTdf(label: String, override val value: Byte) : VarIntTdf<Byte>(label) 
     }
 
     override fun toByte(): Byte = value
-    override fun toInt(): Int = value.toInt()
     override fun toShort(): Short = value.toShort()
-    override fun toLong(): Long = value.toLong()
     override fun toUByte(): UByte = value.toUByte()
-    override fun toUInt(): UInt = value.toUInt()
-    override fun toUShort(): UShort = value.toUShort()
     override fun toULong(): ULong = value.toULong()
-
+    override fun toUInt(): UInt = value.toUInt()
+    override fun toInt(): Int = value.toInt()
+    override fun toUShort(): UShort = value.toUShort()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

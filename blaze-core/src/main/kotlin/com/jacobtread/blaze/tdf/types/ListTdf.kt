@@ -1,6 +1,8 @@
-package com.jacobtread.blaze.tdf
+package com.jacobtread.blaze.tdf.types
 
 import com.jacobtread.blaze.data.VarTriple
+import com.jacobtread.blaze.tdf.Tdf
+import com.jacobtread.blaze.tdf.TdfReadable
 import io.netty.buffer.ByteBuf
 
 class ListTdf(label: String, val type: UByte, override val value: List<Any>) : Tdf<List<Any>>(label, LIST) {

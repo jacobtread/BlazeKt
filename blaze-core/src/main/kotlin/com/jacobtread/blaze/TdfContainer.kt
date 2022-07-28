@@ -4,7 +4,8 @@ package com.jacobtread.blaze
 
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTriple
-import com.jacobtread.blaze.tdf.*
+import com.jacobtread.blaze.tdf.Tdf
+import com.jacobtread.blaze.tdf.types.*
 
 /**
  * TdfContainer Structure representing a collection of TDFs that can be queried for
@@ -97,22 +98,30 @@ interface TdfContainer {
 
 // Tdf Struct-Like Helpers
 
+inline fun TdfContainer.varInt(label: String): VarIntTdf<*> = getTdf(VarIntTdf::class.java, label)
 inline fun TdfContainer.group(label: String): GroupTdf = getTdf(GroupTdf::class.java, label)
 inline fun TdfContainer.optional(label: String): OptionalTdf = getTdf(OptionalTdf::class.java, label)
 
+inline fun TdfContainer.varIntOrNull(label: String): VarIntTdf<*>? = getTdfOrNull(VarIntTdf::class.java, label)
 inline fun TdfContainer.groupOrNull(label: String): GroupTdf? = getTdfOrNull(GroupTdf::class.java, label)
 inline fun TdfContainer.optionalOrNull(label: String): OptionalTdf? = getTdfOrNull(OptionalTdf::class.java, label)
 
 // Non-nullable Helpers
 
 inline fun TdfContainer.text(label: String): String = getValue(StringTdf::class.java, label)
-inline fun TdfContainer.number(label: String): ULong = getValue(VarIntTdf::class.java, label)
+
+
+inline fun TdfContainer.number(label: String): ULong = varInt(label).toULong()
 inline fun TdfContainer.numberLong(label: String): Long = number(label).toLong()
-inline fun TdfContainer.numberInt(label: String): Int = number(label).toInt()
+inline fun TdfContainer.numberInt(label: String): Int = varInt(label).toInt()
+inline fun TdfContainer.numberUInt(label: String): UInt = varInt(label).toUInt()
+inline fun TdfContainer.numberShort(label: String): Short = varInt(label).toShort()
+inline fun TdfContainer.numberUShort(label: String): UShort = varInt(label).toUShort()
+
 inline fun TdfContainer.float(label: String): Float = getValue(FloatTdf::class.java, label)
 inline fun TdfContainer.blob(label: String): ByteArray = getValue(BlobTdf::class.java, label)
 inline fun TdfContainer.unionValue(label: String): Tdf<*>? = getValue(OptionalTdf::class.java, label)
-inline fun TdfContainer.tripple(label: String): VarTriple = getValue(TrippleTdf::class.java, label)
+inline fun TdfContainer.triple(label: String): VarTriple = getValue(TrippleTdf::class.java, label)
 inline fun TdfContainer.pair(label: String): VarPair = getValue(PairTdf::class.java, label)
 inline fun TdfContainer.varIntList(label: String): List<ULong> = getValue(VarIntListTdf::class.java, label)
 
@@ -125,13 +134,17 @@ inline fun <K : Any, V : Any> TdfContainer.map(label: String): Map<K, V> = getVa
 // Nullable Helpers
 
 inline fun TdfContainer.textOrNull(label: String): String? = getValueOrNull(StringTdf::class.java, label)
-inline fun TdfContainer.numberOrNull(label: String): ULong? = getValueOrNull(VarIntTdf::class.java, label)
+inline fun TdfContainer.numberOrNull(label: String): ULong? = varIntOrNull(label)?.toULong()
 inline fun TdfContainer.numberLongOrNull(label: String): Long? = numberOrNull(label)?.toLong()
-inline fun TdfContainer.numberIntOrNull(label: String): Int? = numberOrNull(label)?.toInt()
+inline fun TdfContainer.numberIntOrNull(label: String): Int? = varIntOrNull(label)?.toInt()
+inline fun TdfContainer.numberUIntOrNull(label: String): UInt? = varIntOrNull(label)?.toUInt()
+inline fun TdfContainer.numberShortOrNull(label: String): Short? = varIntOrNull(label)?.toShort()
+inline fun TdfContainer.numberUShortOrNull(label: String): UShort? = varIntOrNull(label)?.toUShort()
+
 inline fun TdfContainer.floatOrNull(label: String): Float? = getValueOrNull(FloatTdf::class.java, label)
 inline fun TdfContainer.blobOrNull(label: String): ByteArray? = getValueOrNull(BlobTdf::class.java, label)
 inline fun TdfContainer.unionValueOrNull(label: String): Tdf<*>? = getValueOrNull(OptionalTdf::class.java, label)
-inline fun TdfContainer.trippleOrNull(label: String): VarTriple? = getValueOrNull(TrippleTdf::class.java, label)
+inline fun TdfContainer.tripleOrNull(label: String): VarTriple? = getValueOrNull(TrippleTdf::class.java, label)
 inline fun TdfContainer.pairOrNull(label: String): VarPair? = getValueOrNull(PairTdf::class.java, label)
 inline fun TdfContainer.varIntListOrNull(label: String): List<ULong>? = getValueOrNull(VarIntListTdf::class.java, label)
 

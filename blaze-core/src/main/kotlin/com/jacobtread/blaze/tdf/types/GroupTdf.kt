@@ -1,7 +1,9 @@
-package com.jacobtread.blaze.tdf
+package com.jacobtread.blaze.tdf.types
 
 import com.jacobtread.blaze.PacketLogger
 import com.jacobtread.blaze.TdfContainer
+import com.jacobtread.blaze.tdf.Tdf
+import com.jacobtread.blaze.tdf.TdfReadable
 import io.netty.buffer.ByteBuf
 
 class GroupTdf(label: String, val start2: Boolean, override val value: List<Tdf<*>>) : Tdf<List<Tdf<*>>>(label, GROUP), TdfContainer {

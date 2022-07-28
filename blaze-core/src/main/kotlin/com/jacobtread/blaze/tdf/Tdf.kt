@@ -3,7 +3,7 @@ package com.jacobtread.blaze.tdf
 import com.jacobtread.blaze.TdfReadException
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTriple
-import com.jacobtread.blaze.tdf.int.VarIntTdf
+import com.jacobtread.blaze.tdf.types.*
 import io.netty.buffer.ByteBuf
 
 abstract class Tdf<V>(val label: String, private val tagType: UByte) {

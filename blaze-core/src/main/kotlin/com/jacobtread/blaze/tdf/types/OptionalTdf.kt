@@ -1,5 +1,6 @@
-package com.jacobtread.blaze.tdf
+package com.jacobtread.blaze.tdf.types
 
+import com.jacobtread.blaze.tdf.Tdf
 import io.netty.buffer.ByteBuf
 
 class OptionalTdf(label: String, val type: UByte = NO_VALUE_TYPE, override val value: Tdf<*>? = null) : Tdf<Tdf<*>?>(label, OPTIONAL) {

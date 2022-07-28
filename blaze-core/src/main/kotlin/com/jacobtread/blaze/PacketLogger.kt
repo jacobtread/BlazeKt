@@ -7,7 +7,8 @@ import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.*
-import com.jacobtread.blaze.tdf.int.VarIntTdf
+import com.jacobtread.blaze.tdf.types.VarIntTdf
+import com.jacobtread.blaze.tdf.types.*
 import io.netty.channel.Channel
 
 /**
