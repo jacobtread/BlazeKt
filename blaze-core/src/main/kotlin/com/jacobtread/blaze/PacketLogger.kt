@@ -472,7 +472,7 @@ object PacketLogger {
                 out.append("number(\"")
                     .append(value.label)
                     .append("\", 0x")
-                    .append(value.toLong().toString(16))
+                    .append(value.toULong().toString(16))
                     .append(')')
             }
         }
