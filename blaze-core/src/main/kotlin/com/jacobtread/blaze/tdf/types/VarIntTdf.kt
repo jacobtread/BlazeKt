@@ -10,14 +10,15 @@ sealed class VarIntTdf<T>(label: String) : Tdf<T>(label, VARINT), VarIntConversi
     companion object : TdfReadable<VarIntTdf<*>> {
         override fun read(label: String, input: ByteBuf): VarIntTdf<*> {
             val value = readVarInt(input)
-            if (value <= 127u) {
-                return ByteTdf(label, (value and 0xFFu).toByte())
+            return if (value <= 127u) {
+                ByteTdf(label, (value and 0xFFu).toByte())
             } else if (value <= 255u) {
-                return UByteTdf(label, value.toUByte())
+                UByteTdf(label, value.toUByte())
             } else if (value <= 32767u) {
-                return ShortTdf(label, (value and 0xFFFFu).toShort())
+                ShortTdf(label, (value and 0xFFFFu).toShort())
+            } else {
+                ULongTdf(label, value)
             }
-            return ULongTdf(label, readVarInt(input))
         }
     }
 

@@ -182,7 +182,7 @@ abstract class Tdf<V>(val label: String, private val tagType: UByte) {
 
         fun writeVarInt(buffer: ByteBuf, value: ULong) {
             if (value < 64u) {
-                buffer.writeByte((value and 255u).toInt())
+                buffer.writeByte((value and 0xFFu).toInt())
             } else {
                 var curByte = (value and 63u).toUByte() or 0x80u
                 buffer.writeByte(curByte.toInt())
