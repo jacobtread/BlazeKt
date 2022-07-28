@@ -2,10 +2,7 @@ package com.jacobtread.blaze
 
 import com.jacobtread.blaze.data.VarPair
 import com.jacobtread.blaze.data.VarTriple
-import com.jacobtread.blaze.tdf.*
-import com.jacobtread.blaze.tdf.types.ByteTdf
-import com.jacobtread.blaze.tdf.types.ShortTdf
-import com.jacobtread.blaze.tdf.types.ULongTdf
+import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.types.*
 
 /**
@@ -73,6 +70,18 @@ class TdfBuilder {
         } else {
             values.add(ULongTdf(label, value.toULong()))
         }
+    }
+
+    fun byte(label: String, value: Byte) {
+        values.add(ByteTdf(label, value))
+    }
+
+    fun ubyte(label: String, value: UByte) {
+        values.add(UByteTdf(label, value))
+    }
+
+    fun short(label: String, value: Short) {
+        values.add(ShortTdf(label, value))
     }
 
     fun number(label: String, value: Int) {
