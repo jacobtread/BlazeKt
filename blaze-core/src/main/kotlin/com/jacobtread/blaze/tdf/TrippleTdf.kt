@@ -1,9 +1,9 @@
 package com.jacobtread.blaze.tdf
 
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import io.netty.buffer.ByteBuf
 
-class TrippleTdf(label: String, override val value: VarTripple) : Tdf<VarTripple>(label, TRIPPLE) {
+class TrippleTdf(label: String, override val value: VarTriple) : Tdf<VarTriple>(label, TRIPPLE) {
     companion object : TdfReadable<TrippleTdf> {
         override fun read(label: String, input: ByteBuf): TrippleTdf = TrippleTdf(label, readVarTripple(input))
     }

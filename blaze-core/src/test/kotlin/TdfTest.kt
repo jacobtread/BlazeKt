@@ -1,6 +1,6 @@
 import com.jacobtread.blaze.tdf.*
 import com.jacobtread.blaze.data.VarPair
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import io.netty.buffer.Unpooled
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -50,7 +50,7 @@ internal class TdfTest {
             val length = Random.nextInt(minLength..maxLength)
             createRandomString(length)
         }
-        private val TrippleGen: Generator<VarTripple> = { VarTripple(ULongGen(), ULongGen(), ULongGen()) }
+        private val TrippleGen: Generator<VarTriple> = { VarTriple(ULongGen(), ULongGen(), ULongGen()) }
         private val PairGen: Generator<VarPair> = { VarPair(ULongGen(), ULongGen()) }
         private val FloatGen: Generator<Float> = { Random.nextFloat() }
 

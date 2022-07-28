@@ -1,6 +1,6 @@
 package com.jacobtread.blaze.tdf
 
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import io.netty.buffer.ByteBuf
 
 class ListTdf(label: String, val type: UByte, override val value: List<Any>) : Tdf<List<Any>>(label, LIST) {
@@ -26,7 +26,7 @@ class ListTdf(label: String, val type: UByte, override val value: List<Any>) : T
                     ListTdf(label, subType, values)
                 }
                 TRIPPLE -> {
-                    val values = ArrayList<VarTripple>(count)
+                    val values = ArrayList<VarTriple>(count)
                     repeat(count) { values.add(readVarTripple(input)) }
                     ListTdf(label, subType, values)
                 }
@@ -42,7 +42,7 @@ class ListTdf(label: String, val type: UByte, override val value: List<Any>) : T
             VARINT -> value.forEach { writeVarIntFuzzy(out, it) }
             STRING -> value.forEach { writeString(out, it as String) }
             GROUP -> value.forEach { (it as GroupTdf).write(out) }
-            TRIPPLE -> value.forEach { writeVarTripple(out, it as VarTripple) }
+            TRIPPLE -> value.forEach { writeVarTripple(out, it as VarTriple) }
         }
     }
 
@@ -52,7 +52,7 @@ class ListTdf(label: String, val type: UByte, override val value: List<Any>) : T
             VARINT -> value.forEach { size += computeVarIntSizeFuzzy(it) }
             STRING -> value.forEach { size += computeStringSize(it as String) }
             GROUP -> value.forEach { size += (it as GroupTdf).computeSize() }
-            TRIPPLE -> value.forEach { size += computeVarTrippleSize(it as VarTripple) }
+            TRIPPLE -> value.forEach { size += computeVarTrippleSize(it as VarTriple) }
         }
         return size
     }

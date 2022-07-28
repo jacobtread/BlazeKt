@@ -1,7 +1,7 @@
 package com.jacobtread.blaze
 
 import com.jacobtread.blaze.PacketLogger.init
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import com.jacobtread.blaze.debug.BlazeLoggingOutput
 import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
@@ -329,7 +329,7 @@ object PacketLogger {
 
                     Tdf.TRIPPLE -> {
                         values.joinTo(out, ", ") {
-                            val tripple = it as VarTripple
+                            val tripple = it as VarTriple
                             val a = tripple.a.toString(16)
                             val b = tripple.b.toString(16)
                             val c = tripple.c.toString(16)

@@ -3,7 +3,7 @@
 package com.jacobtread.blaze
 
 import com.jacobtread.blaze.data.VarPair
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import com.jacobtread.blaze.tdf.*
 
 /**
@@ -112,7 +112,7 @@ inline fun TdfContainer.numberInt(label: String): Int = number(label).toInt()
 inline fun TdfContainer.float(label: String): Float = getValue(FloatTdf::class.java, label)
 inline fun TdfContainer.blob(label: String): ByteArray = getValue(BlobTdf::class.java, label)
 inline fun TdfContainer.unionValue(label: String): Tdf<*>? = getValue(OptionalTdf::class.java, label)
-inline fun TdfContainer.tripple(label: String): VarTripple = getValue(TrippleTdf::class.java, label)
+inline fun TdfContainer.tripple(label: String): VarTriple = getValue(TrippleTdf::class.java, label)
 inline fun TdfContainer.pair(label: String): VarPair = getValue(PairTdf::class.java, label)
 inline fun TdfContainer.varIntList(label: String): List<ULong> = getValue(VarIntListTdf::class.java, label)
 
@@ -131,7 +131,7 @@ inline fun TdfContainer.numberIntOrNull(label: String): Int? = numberOrNull(labe
 inline fun TdfContainer.floatOrNull(label: String): Float? = getValueOrNull(FloatTdf::class.java, label)
 inline fun TdfContainer.blobOrNull(label: String): ByteArray? = getValueOrNull(BlobTdf::class.java, label)
 inline fun TdfContainer.unionValueOrNull(label: String): Tdf<*>? = getValueOrNull(OptionalTdf::class.java, label)
-inline fun TdfContainer.trippleOrNull(label: String): VarTripple? = getValueOrNull(TrippleTdf::class.java, label)
+inline fun TdfContainer.trippleOrNull(label: String): VarTriple? = getValueOrNull(TrippleTdf::class.java, label)
 inline fun TdfContainer.pairOrNull(label: String): VarPair? = getValueOrNull(PairTdf::class.java, label)
 inline fun TdfContainer.varIntListOrNull(label: String): List<ULong>? = getValueOrNull(VarIntListTdf::class.java, label)
 

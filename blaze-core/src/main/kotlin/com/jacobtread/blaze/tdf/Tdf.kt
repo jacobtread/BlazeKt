@@ -2,7 +2,7 @@ package com.jacobtread.blaze.tdf
 
 import com.jacobtread.blaze.TdfReadException
 import com.jacobtread.blaze.data.VarPair
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import com.jacobtread.blaze.tdf.int.VarIntTdf
 import io.netty.buffer.ByteBuf
 
@@ -30,7 +30,7 @@ abstract class Tdf<V>(val label: String, private val tagType: UByte) {
                 String::class.java -> STRING
                 Float::class.java -> FLOAT
                 GroupTdf::class.java -> GROUP
-                VarTripple::class.java -> TRIPPLE
+                VarTriple::class.java -> TRIPPLE
                 else -> throw IllegalArgumentException("Don't know how to handle type \"${valueType.simpleName}\"")
             }
         }
@@ -156,7 +156,7 @@ abstract class Tdf<V>(val label: String, private val tagType: UByte) {
             return computeVarIntSize(bytes.size.toULong()) + bytes.size
         }
 
-        fun computeVarTrippleSize(value: VarTripple): Int {
+        fun computeVarTrippleSize(value: VarTriple): Int {
             return computeVarIntSize(value.a) + computeVarIntSize(value.b) + computeVarIntSize(value.c)
         }
 
@@ -196,7 +196,7 @@ abstract class Tdf<V>(val label: String, private val tagType: UByte) {
             }
         }
 
-        fun writeVarTripple(buffer: ByteBuf, value: VarTripple) {
+        fun writeVarTripple(buffer: ByteBuf, value: VarTriple) {
             writeVarInt(buffer, value.a)
             writeVarInt(buffer, value.b)
             writeVarInt(buffer, value.c)
@@ -232,8 +232,8 @@ abstract class Tdf<V>(val label: String, private val tagType: UByte) {
             return result
         }
 
-        fun readVarTripple(buffer: ByteBuf): VarTripple {
-            return VarTripple(
+        fun readVarTripple(buffer: ByteBuf): VarTriple {
+            return VarTriple(
                 readVarInt(buffer),
                 readVarInt(buffer),
                 readVarInt(buffer),

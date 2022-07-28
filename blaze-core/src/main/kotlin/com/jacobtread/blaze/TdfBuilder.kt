@@ -1,8 +1,12 @@
 package com.jacobtread.blaze
 
 import com.jacobtread.blaze.data.VarPair
-import com.jacobtread.blaze.data.VarTripple
+import com.jacobtread.blaze.data.VarTriple
 import com.jacobtread.blaze.tdf.*
+import com.jacobtread.blaze.tdf.int.ByteTdf
+import com.jacobtread.blaze.tdf.int.ShortTdf
+import com.jacobtread.blaze.tdf.int.UByteTdf
+import com.jacobtread.blaze.tdf.int.ULongTdf
 
 /**
  * TdfBuilder Builder class used to create Tdf structures easily
@@ -32,6 +36,7 @@ class TdfBuilder {
         values.add(StringTdf(label, value))
     }
 
+
     /**
      * number Adds a new number value to the builder.
      * This becomes a VarInt when created
@@ -40,7 +45,15 @@ class TdfBuilder {
      * @param value The long value of the Tdf
      */
     fun number(label: String, value: ULong) {
-        values.add(VarIntTdf(label, value))
+        if (value <= 127u) {
+            values.add(ByteTdf(label, (value and 0xFFu).toByte()))
+        } else if (value <= 255u) {
+            values.add(UByteTdf(label, value.toUByte()))
+        } else if (value <= 32767u) {
+            values.add(ShortTdf(label, (value and 0xFFFFu).toShort()))
+        } else {
+            values.add(ULongTdf(label, value))
+        }
     }
 
     /**
@@ -51,15 +64,39 @@ class TdfBuilder {
      * @param value The int value of the Tdf
      */
     fun number(label: String, value: UInt) {
-        values.add(VarIntTdf(label, value.toULong()))
+        if (value <= 127u) {
+            values.add(ByteTdf(label, (value and 0xFFu).toByte()))
+        } else if (value <= 255u) {
+            values.add(UByteTdf(label, value.toUByte()))
+        } else if (value <= 32767u) {
+            values.add(ShortTdf(label, (value and 0xFFFFu).toShort()))
+        } else {
+            values.add(ULongTdf(label, value.toULong()))
+        }
     }
 
     fun number(label: String, value: Int) {
-        values.add(VarIntTdf(label, value.toULong()))
+        if (value <= 127) {
+            values.add(ByteTdf(label, (value and 0xFF).toByte()))
+        } else if (value <= 255) {
+            values.add(UByteTdf(label, value.toUByte()))
+        } else if (value <= 32767) {
+            values.add(ShortTdf(label, (value and 0xFFFF).toShort()))
+        } else {
+            values.add(ULongTdf(label, value))
+        }
     }
 
     fun number(label: String, value: Long) {
-        values.add(VarIntTdf(label, value.toULong()))
+        if (value <= 127) {
+            values.add(ByteTdf(label, (value and 0xFF).toByte()))
+        } else if (value <= 255) {
+            values.add(UByteTdf(label, value.toUByte()))
+        } else if (value <= 32767) {
+            values.add(ShortTdf(label, (value and 0xFFFF).toShort()))
+        } else {
+            values.add(ULongTdf(label, value.toULong()))
+        }
     }
 
     /**
@@ -70,7 +107,7 @@ class TdfBuilder {
      * @param value The boolean value of the Tdf true = 0x1 false = 0x0
      */
     fun bool(label: String, value: Boolean) {
-        values.add(VarIntTdf(label, if (value) 1u else 0u))
+        values.add(ByteTdf(label, if (value) 1 else 0))
     }
 
 
@@ -95,13 +132,16 @@ class TdfBuilder {
      * @param c The third value of the tripple
      */
     fun tripple(label: String, a: Long, b: Long, c: Long) {
-        values.add(TrippleTdf(label, VarTripple(a.toULong(), b.toULong(), c.toULong())))
+        values.add(TrippleTdf(label, VarTriple(a.toULong(), b.toULong(), c.toULong())))
     }
 
     fun tripple(label: String, a: ULong, b: ULong, c: ULong) {
-        values.add(TrippleTdf(label, VarTripple(a, b, c)))
+        values.add(TrippleTdf(label, VarTriple(a, b, c)))
     }
 
+    fun tripple(label: String, a: Int, b: Int, c: Int) {
+        values.add(TrippleTdf(label, VarTriple(a.toULong(), b.toULong(), c.toULong())))
+    }
 
     /**
      * tripple Adds a new tripple value to the builder.
@@ -110,7 +150,7 @@ class TdfBuilder {
      * @param label The label of the Tdf
      * @param value The tripple value
      */
-    fun tripple(label: String, value: VarTripple) {
+    fun tripple(label: String, value: VarTriple) {
         values.add(TrippleTdf(label, value))
     }
 
@@ -129,6 +169,11 @@ class TdfBuilder {
     fun pair(label: String, a: ULong, b: ULong) {
         values.add(PairTdf(label, VarPair(a, b)))
     }
+
+    fun pair(label: String, a: Int, b: Int) {
+        values.add(PairTdf(label, VarPair(a.toULong(), b.toULong())))
+    }
+
 
     /**
      * pair Adds a new pair of values to the builder.
