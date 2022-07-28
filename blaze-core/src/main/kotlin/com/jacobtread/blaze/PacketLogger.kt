@@ -7,6 +7,7 @@ import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.*
+import com.jacobtread.blaze.tdf.int.VarIntTdf
 import io.netty.channel.Channel
 
 /**
@@ -466,11 +467,11 @@ object PacketLogger {
                 out.append("))")
             }
 
-            is VarIntTdf -> {
+            is VarIntTdf<*> -> {
                 out.append("number(\"")
                     .append(value.label)
                     .append("\", 0x")
-                    .append(value.value.toString(16))
+                    .append(value.toLong().toString(16))
                     .append(')')
             }
         }
