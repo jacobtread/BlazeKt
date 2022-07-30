@@ -38,7 +38,7 @@ interface TdfContainer {
     @Throws(MissingTdfException::class, InvalidTdfException::class)
     fun <C : Tdf<*>> getTdf(type: Class<C>, label: String): C {
         val value = getTdfByLabel(label) ?: throw MissingTdfException(label)
-        if (!value.javaClass.isAssignableFrom(type)) throw InvalidTdfException(label, type, value.javaClass)
+        if (!type.isAssignableFrom(value.javaClass)) throw InvalidTdfException(label, type, value.javaClass)
         return type.cast(value)
     }
 
@@ -54,7 +54,7 @@ interface TdfContainer {
      */
     fun <C : Tdf<*>> getTdfOrNull(type: Class<C>, label: String): C? {
         val value = getTdfByLabel(label)
-        if (value == null || !value.javaClass.isAssignableFrom(type)) return null
+        if (value == null || !type.isAssignableFrom(value.javaClass)) return null
         return type.cast(value)
     }
 
@@ -72,7 +72,7 @@ interface TdfContainer {
     @Throws(MissingTdfException::class, InvalidTdfException::class)
     fun <T, C : Tdf<T>> getValue(type: Class<C>, label: String): T {
         val value = getTdfByLabel(label) ?: throw MissingTdfException(label)
-        if (!value.javaClass.isAssignableFrom(type)) throw InvalidTdfException(label, type, value.javaClass)
+        if (!type.isAssignableFrom(value.javaClass)) throw InvalidTdfException(label, type, value.javaClass)
         return type.cast(value).value
 
     }
@@ -89,7 +89,7 @@ interface TdfContainer {
      */
     fun <T, C : Tdf<T>> getValueOrNull(type: Class<C>, label: String): T? {
         val value = getTdfByLabel(label)
-        if (value == null || !value.javaClass.isAssignableFrom(type)) return null
+        if (value == null || !type.isAssignableFrom(value.javaClass)) return null
         return type.cast(value).value
     }
 }
