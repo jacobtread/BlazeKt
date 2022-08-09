@@ -6,8 +6,7 @@ import com.jacobtread.blaze.debug.BlazeLoggingOutput
 import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
-import com.jacobtread.blaze.tdf.*
-import com.jacobtread.blaze.tdf.types.VarIntTdf
+import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.types.*
 import io.netty.channel.Channel
 
@@ -89,7 +88,7 @@ object PacketLogger {
      * @param packet The packet to dump
      * @param cause The cause of the failure
      */
-    private fun dumpPacketException(packet: Packet, cause: Throwable) {
+    fun dumpPacketException(packet: Packet, cause: Throwable) {
         try {
             val out = StringBuilder("Failed to decode packet contents for debugging: ")
                 .appendLine()
@@ -225,9 +224,17 @@ object PacketLogger {
                 .append(packet.type.toString(16))
         }
 
-        out.append(", 0x")
-            .append(packet.error.toString(16))
-            .appendLine(") {")
+        if (packet.type == Packet.ERROR_TYPE) {
+            out.append(", 0x")
+                .append(packet.error.toString(16))
+        }
+
+        if (packet.type == Packet.INCOMING_TYPE || packet.type == Packet.RESPONSE_TYPE) {
+            out.append(", 0x")
+                .append(packet.id.toString(16))
+        }
+
+        out.appendLine(") {")
 
         packet.content.forEach {
             createTdfSource(out, 1, it, false)
