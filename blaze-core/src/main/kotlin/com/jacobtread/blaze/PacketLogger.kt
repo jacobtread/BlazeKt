@@ -2,13 +2,14 @@ package com.jacobtread.blaze
 
 import com.jacobtread.blaze.PacketLogger.init
 import com.jacobtread.blaze.data.VarTriple
-import com.jacobtread.blaze.debug.BlazeLoggingOutput
+import com.jacobtread.blaze.debug.BlazeLoggingConfig
 import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.types.*
 import io.netty.channel.Channel
+import io.netty.util.AttributeKey
 
 /**
  * Logger implementation for logging debug information
@@ -17,6 +18,12 @@ import io.netty.channel.Channel
  * @constructor Create empty Packet logger
  */
 object PacketLogger {
+
+    /**
+     * Channel attribute key for storing information about the channel
+     * used for extra logging information while decoding / encoding packets
+     */
+    private val PACKET_CONTEXT_KEY: AttributeKey<String> = AttributeKey.newInstance("PacketContext")
 
     private var debugComponentNames: Map<Int, String>? = null
     private var debugCommandNames: Map<Int, String>? = null
@@ -47,6 +54,18 @@ object PacketLogger {
     }
 
     /**
+     * Sets the value of the [PACKET_CONTEXT_KEY] for the
+     * provided channel to [value]
+     *
+     * @param channel The channel to set the context value for
+     * @param value The value for the context
+     */
+    fun setContext(channel: Channel, value: String) {
+        channel.attr(PACKET_CONTEXT_KEY)
+            .set(value)
+    }
+
+    /**
      * Logs a packet to the debug output using the provided [output]
      * logging pipe.
      *
@@ -63,7 +82,7 @@ object PacketLogger {
             repeat(lineWidth - (title.length + 1)) { out.append('=') }
             out.appendLine()
 
-            val contextAttr: String? = channel.attr(PacketEncoder.ENCODER_CONTEXT_KEY)
+            val contextAttr: String? = channel.attr(PACKET_CONTEXT_KEY)
                 .get()
 
             if (contextAttr != null) {

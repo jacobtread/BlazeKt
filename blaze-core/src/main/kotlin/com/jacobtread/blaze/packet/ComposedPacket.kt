@@ -33,4 +33,8 @@ class ComposedPacket(
         content.forEach { size += it.computeFullSize() }
         return size
     }
+
+    override fun toString(): String {
+        return "ComposedPacket (Component: $component, Command: $command, Error; $error, QType: $type, Id: $id, Content Count: ${content.size})"
+    }
 }

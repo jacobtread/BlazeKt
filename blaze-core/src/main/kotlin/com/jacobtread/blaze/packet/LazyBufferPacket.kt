@@ -67,9 +67,7 @@ class LazyBufferPacket(
         }
     }
 
-
     override fun toString(): String {
         return "LazyBufferPacket (Component: $component, Command: $command, Error; $error, QType: $type, Id: $id, Content: ${contentBuffer.readableBytes()}byte(s))"
     }
-
 }
