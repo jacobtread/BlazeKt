@@ -20,6 +20,56 @@ typealias Generator<T> = () -> T
  */
 internal class TdfTest {
 
+    /**
+     * test varint Tests the VarInt encoding against
+     * a variety of different number values
+     */
+    @Test
+    fun `test varint`() = testTdfIterations(VarIntTdfGen)
+
+
+    /**
+     * test string Tests the string encoding against
+     * a randomized string between 0 and 1000 characters
+     * long
+     */
+    @Test
+    fun `test string`() = testTdfIterations(StringTdfGen)
+
+    /**
+     * test blob Tests the blob (ByteArray) encoding on random
+     * byte arrays with lengths between 0 and 500
+     */
+    @Test
+    fun `test blob`() = testTdfIterations(BlobTdfGen)
+
+    /**
+     * test group Tests the group encoding using random Tdf values
+     */
+    @Test
+    fun `test group`() = testTdfIterations(GroupTdfGen)
+
+    @Test
+    fun `test list`() = testTdfIterations(ListTdfGen)
+
+    @Test
+    fun `test map`() = testTdfIterations(MapTdfGen)
+
+    @Test
+    fun `test optional`() = testTdfIterations(OptionalTdfGen)
+
+    @Test
+    fun `test var int list`() = testTdfIterations(VarIntListTdfTdfGen)
+
+    @Test
+    fun `test pair`() = testTdfIterations(PairTdfGen)
+
+    @Test
+    fun `test tripple`() = testTdfIterations(TrippleTdfGen)
+
+    @Test
+    fun `test float`() = testTdfIterations(FloatTdfGen)
+
     companion object {
         const val ITERATIONS = 100
 
@@ -200,54 +250,4 @@ internal class TdfTest {
             }
         }
     }
-
-    /**
-     * test varint Tests the VarInt encoding against
-     * a variety of different number values
-     */
-    @Test
-    fun `test varint`() = testTdfIterations(VarIntTdfGen)
-
-
-    /**
-     * test string Tests the string encoding against
-     * a randomized string between 0 and 1000 characters
-     * long
-     */
-    @Test
-    fun `test string`() = testTdfIterations(StringTdfGen)
-
-    /**
-     * test blob Tests the blob (ByteArray) encoding on random
-     * byte arrays with lengths between 0 and 500
-     */
-    @Test
-    fun `test blob`() = testTdfIterations(BlobTdfGen)
-
-    /**
-     * test group Tests the group encoding using random Tdf values
-     */
-    @Test
-    fun `test group`() = testTdfIterations(GroupTdfGen)
-
-    @Test
-    fun `test list`() = testTdfIterations(ListTdfGen)
-
-    @Test
-    fun `test map`() = testTdfIterations(MapTdfGen)
-
-    @Test
-    fun `test optional`() = testTdfIterations(OptionalTdfGen)
-
-    @Test
-    fun `test var int list`() = testTdfIterations(VarIntListTdfTdfGen)
-
-    @Test
-    fun `test pair`() = testTdfIterations(PairTdfGen)
-
-    @Test
-    fun `test tripple`() = testTdfIterations(TrippleTdfGen)
-
-    @Test
-    fun `test float`() = testTdfIterations(FloatTdfGen)
 }

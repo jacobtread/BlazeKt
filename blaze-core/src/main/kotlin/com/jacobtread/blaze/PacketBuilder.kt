@@ -1,4 +1,3 @@
-@file:Suppress("Unused")
 package com.jacobtread.blaze
 
 import com.jacobtread.blaze.packet.*
