@@ -9,13 +9,6 @@ import io.netty.buffer.ByteBuf
  * provided buffer only if / when the contents are requested. Used
  * by packets loaded from the network
  *
- * This implementation is reference counted and the reference count is
- * linked to the reference count of the underlying content buffer. This
- * reference count should be decremented as soon as the object is done with
- *
- * @see ComposedPacket Packets generated on the server side represented
- * as a list of Tdfs for the value rather than a buffer.
- *
  * @property component the component of this packet
  * @property command The command of this packet
  * @property error The error value of this packet
@@ -33,6 +26,12 @@ class LazyBufferPacket(
     val contentBuffer: ByteBuf,
 ) : Packet {
 
+    /**
+     * The Tdf contents stored inside this packet.
+     *
+     * In this case the TDFs are obtained by lazy reference
+     * because they have to be loaded from the content buffer
+     */
     override val content: List<Tdf<*>> by lazy {
         if (contentBuffer.refCnt() < 1) {
             emptyList()
@@ -55,16 +54,34 @@ class LazyBufferPacket(
         }
     }
 
-    override fun writeContent(out: ByteBuf) {
-        out.writeBytes(contentBuffer, contentBuffer.readerIndex(), contentBuffer.readableBytes())
+    /**
+     * Calculates the size in bytes that a buffer
+     * would need to be to fit the contents of this
+     * packet.
+     *
+     * In this case the contents are already encoded
+     * into a byte buffer so the size of that buffer
+     * is the computed size.
+     *
+     * @return The size in bytes the buffer needs to be
+     */
+    override fun computeContentSize(): Int {
+        return contentBuffer.readableBytes()
     }
 
-    override fun computeContentSize(): Int = contentBuffer.readableBytes()
 
-    fun release() {
-        if (contentBuffer.refCnt() > 0) {
-            contentBuffer.release()
-        }
+    /**
+     * Handles writing the contents of this packet
+     * to the provided output buffer.
+     *
+     * In this case the contents are already encoded
+     * in a byte buffer so those bytes are directly
+     * copied to the output buffer.
+     *
+     * @param out The buffer to write to
+     */
+    override fun writeContent(out: ByteBuf) {
+        out.writeBytes(contentBuffer, contentBuffer.readerIndex(), contentBuffer.readableBytes())
     }
 
     override fun toString(): String {

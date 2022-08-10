@@ -132,7 +132,7 @@ object PacketLogger {
                 .append("Type: ")
                 .append(
                     when (packet.type) {
-                        Packet.INCOMING_TYPE -> "INCOMING"
+                        Packet.REQUEST_TYPE -> "INCOMING"
                         Packet.ERROR_TYPE -> "ERROR"
                         Packet.NOTIFY_TYPE -> "NOTIFY"
                         Packet.RESPONSE_TYPE -> "RESPONSE"
@@ -230,7 +230,7 @@ object PacketLogger {
         out.append(", ")
 
         when (packet.type) {
-            Packet.INCOMING_TYPE -> out.append("INCOMING_TYPE")
+            Packet.REQUEST_TYPE -> out.append("INCOMING_TYPE")
             Packet.RESPONSE_TYPE -> out.append("RESPONSE_TYPE")
             Packet.NOTIFY_TYPE -> out.append("NOTIFY_TYPE")
             Packet.ERROR_TYPE -> out.append("ERROR_TYPE")
@@ -243,7 +243,7 @@ object PacketLogger {
                 .append(packet.error.toString(16))
         }
 
-        if (packet.type == Packet.INCOMING_TYPE || packet.type == Packet.RESPONSE_TYPE) {
+        if (packet.type == Packet.REQUEST_TYPE || packet.type == Packet.RESPONSE_TYPE) {
             out.append(", 0x")
                 .append(packet.id.toString(16))
         }

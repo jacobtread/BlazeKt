@@ -56,8 +56,26 @@ class PacketHandler : ChannelDuplexHandler() {
             // The buffer which needs to be released
             var buffer: ByteBuf? = null
             try {
-                buffer = Packet.allocateBuffer(ctx.alloc(), msg)
-                msg.writeTo(buffer)
+                val contentSize = msg.computeContentSize()
+                val isExtended = contentSize > 0xFFFF
+                val bufferSize = 12 + contentSize + (if (isExtended) 2 else 0)
+                buffer = ctx.alloc().ioBuffer(bufferSize, bufferSize)
+
+                with(buffer) {
+                    writeShort(contentSize) // Length of the packet content
+                    writeShort(msg.component) // Packet component value
+                    writeShort(msg.command) // Packet command value
+                    writeShort(msg.error) // Packet error value
+                    writeByte(msg.type shr 8) // Packet type value
+                    writeByte(if (isExtended) 0x10 else 0x00) // Whether the packet is extended
+                    writeShort(msg.id) // Packet id
+                    if (isExtended) {
+                        writeByte(((contentSize.toLong() and 0xFF000000) shr 24).toInt())
+                        writeByte((contentSize and 0x00FF0000) shr 16)
+                    }
+                    msg.writeContent(this)
+                }
+
                 ctx.flush()
                 if (PacketLogger.isEnabled) {
                     PacketLogger.log("ENCODED PACKET", ctx.channel(), msg)

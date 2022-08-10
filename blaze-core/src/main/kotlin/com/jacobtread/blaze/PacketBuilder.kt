@@ -1,14 +1,8 @@
-@file:Suppress("NOTHING_TO_INLINE")
-
+@file:Suppress("Unused")
 package com.jacobtread.blaze
 
-import com.jacobtread.blaze.packet.ComposedPacket
-import com.jacobtread.blaze.packet.Packet
-import com.jacobtread.blaze.packet.Packet.Companion.ERROR_TYPE
-import com.jacobtread.blaze.packet.Packet.Companion.INCOMING_TYPE
-import com.jacobtread.blaze.packet.Packet.Companion.NOTIFY_TYPE
-import com.jacobtread.blaze.packet.Packet.Companion.NO_ERROR
-import com.jacobtread.blaze.packet.Packet.Companion.RESPONSE_TYPE
+import com.jacobtread.blaze.packet.*
+import com.jacobtread.blaze.tdf.Tdf
 
 /**
  * Alias for a function that initializes the contents of a TdfBuilder
@@ -16,35 +10,84 @@ import com.jacobtread.blaze.packet.Packet.Companion.RESPONSE_TYPE
  */
 typealias ContentInitializer = TdfBuilder.() -> Unit
 
-inline fun clientPacket(component: Int, command: Int, id: Int, init: ContentInitializer): Packet = initializePacket(component, command, NO_ERROR, INCOMING_TYPE, id, init)
-inline fun clientPacket(component: Int, command: Int, id: Int): Packet = initializeEmptyPacket(component, command, NO_ERROR, INCOMING_TYPE, id)
+/**
+ * Uses the provided [ContentInitializer] to initialize
+ * a [TdfBuilder] and returns the resulting values.
+ *
+ * @param init The content initializer
+ * @return The content values
+ */
+inline fun getTdfList(init: ContentInitializer): ArrayList<Tdf<*>> {
+    val builder = TdfBuilder()
+    builder.init()
+    return builder.values
+}
+
+/**
+ * Creates a new client packet using the provided values and
+ * the [ContentInitializer]. Client packets are listed here
+ * for creation so that they can be used to emulate clients
+ * when accessing the official servers (e.g. for origin fetching)
+ *
+ * @param component The component for this packet
+ * @param command The command for this packet
+ * @param id The id for this packet
+ * @param init The content initializer
+ * @return The created packet
+ */
+inline fun clientPacket(component: Int, command: Int, id: Int, init: ContentInitializer): Packet {
+    return RequestPacket(component, command, id, getTdfList(init))
+}
+
+/**
+ * Creates a new client packet using the provided values and
+ * the [ContentInitializer]. Client packets are listed here
+ * for creation so that they can be used to emulate clients
+ * when accessing the official servers (e.g. for origin fetching)
+ *
+ * This implementation has no content.
+ *
+ * @param component The component for this packet
+ * @param command The command for this packet
+ * @param id The id for this packet
+ * @return The created packet
+ */
+fun clientPacket(component: Int, command: Int, id: Int): Packet {
+    return RequestPacket(component, command, id, emptyList())
+}
 
 
 /**
- * respond Creates a packet responding to the packet that this was called on.
- * The packet will be of the RESPONSE type and will have its contents initialized
- * within the provided function. INLINED
+ * Creates a new response packet which is used to respond to an existing
+ * packet. This is an extension of [Packet] so that it can be directly sent
+ * for an existing packet.
  *
  * @param init The initializer for the content of this packet
  * @return The created packet
  */
-inline fun Packet.respond(init: ContentInitializer): Packet = initializePacket(component, command, NO_ERROR, RESPONSE_TYPE, id, init)
+inline fun Packet.respond(init: ContentInitializer): Packet {
+    return ResponsePacket(component, command, id, getTdfList(init))
+}
 
 /**
- * respond Creates a packet responding to the packet that this was called on.
- * The packet will be of the RESPONSE type this packet will have empty content
+ * Creates a new response packet which is used to respond to an existing
+ * packet. This is an extension of [Packet] so that it can be directly sent
+ * for an existing packet.
+ *
+ * This implementation has no content
  *
  * @return The created packet
  */
-inline fun Packet.respond(): Packet = initializeEmptyPacket(component, command, NO_ERROR, RESPONSE_TYPE, id)
+fun Packet.respond(): Packet {
+    return ResponsePacket(component, command, id, emptyList())
+}
 
 /**
- * notify Creates a packet that is not responding to any other packets
- * using the provided command and component, initializes the contents
- * using the provided content initializer
+ * Creates a new notify packet which is used to notify clients of
+ * changes or new data without it being requested first.
  *
- * @param component The component of the packet
- * @param command The command of the packet
+ * @param component The component for this packet
+ * @param command The command for this packet
  * @param init The content initializer
  * @return The created packet
  */
@@ -52,79 +95,45 @@ inline fun notify(
     component: Int,
     command: Int,
     init: ContentInitializer,
-): Packet = initializePacket(component, command, NO_ERROR, NOTIFY_TYPE, 0x0, init)
-
-/**
- * notify Creates a packet that is not responding to any other packets
- * using the provided command and component
- *
- * @param component The component of the packet
- * @param command The command of the packet
- * @return The created packet
- */
-inline fun notify(component: Int, command: Int): Packet = initializeEmptyPacket(component, command, NO_ERROR, NOTIFY_TYPE, 0x0)
-
-
-/**
- * error Creates a packet responding to the packet that this was called on. This packet
- * contains an error as well. The packet will be of the ERROR type and will have its
- * contents initialized within the provided function. INLINED
- *
- * @param init The initializer for the content of this packet
- * @return The created packet
- */
-inline fun Packet.error(error: Int, init: ContentInitializer): Packet = initializePacket(component, command, error, ERROR_TYPE, id, init)
-
-/**
- * error Creates a packet responding to the packet that this was called on. This packet
- * contains an error as well. The packet will be of the ERROR type and will have no content
- *
- * @return The created packet
- */
-inline fun Packet.error(error: Int): Packet = initializeEmptyPacket(component, command, error, ERROR_TYPE, id)
-
-
-/**
- * initializePacket Initializes the contents of and then creates a new packet
- * with the provided packet details. Creates the packet contents with the init
- * function that was provided.
- *
- * @param component The packet component
- * @param command The packet command
- * @param error The packet error
- * @param type The packet type
- * @param id The packet id
- * @param init The content initializer
- * @return The created packet
- */
-inline fun initializePacket(
-    component: Int,
-    command: Int,
-    error: Int,
-    type: Int,
-    id: Int,
-    init: ContentInitializer,
-): Packet {
-    val builder = TdfBuilder()
-    builder.init()
-    return ComposedPacket(component, command, error, type, id, builder.values)
+): NotifyPacket {
+    return NotifyPacket(component, command, getTdfList(init))
 }
 
 /**
- * initializeEmptyPacket Creates a packet with the provided details
- * but with empty contents.
+ * Creates a new notify packet which is used to notify clients of
+ * changes or new data without it being requested first.
  *
- * @param component The packet component
- * @param command The packet command
- * @param error The packet error
- * @param type The packet type
- * @param id The packet id
- * @return
+ * This implementation has no content
+ *
+ * @param component The component for this packet
+ * @param command The command for this packet
+ * @return The created packet
  */
-inline fun initializeEmptyPacket(
-    component: Int,
-    command: Int,
-    error: Int,
-    type: Int,
-    id: Int,
-): Packet = ComposedPacket(component, command, error, type, id, emptyList())
+fun notify(component: Int, command: Int): NotifyPacket {
+    return NotifyPacket(component, command, emptyList())
+}
+
+/**
+ * Creates a new error packet which is responding to a previous request
+ * packet with the provided [error] and content generated by [init]
+ *
+ * @param error The error for this packet
+ * @param init The content initializer
+ * @return The created packet
+ */
+inline fun Packet.error(error: Int, init: ContentInitializer): Packet {
+    return ErrorPacket(component, command, id, error, getTdfList(init))
+}
+
+/**
+ * Creates a new error packet which is responding to a previous request
+ * packet with the provided [error]
+ *
+ * This implementation has no content
+ *
+ * @param error The error for this packet
+ * @return The created packet
+ */
+fun Packet.error(error: Int): Packet {
+    return ErrorPacket(component, command, id, error, emptyList())
+}
