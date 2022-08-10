@@ -1,5 +1,6 @@
 package com.jacobtread.blaze
 
+import com.jacobtread.blaze.logging.PacketLogger
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import io.netty.buffer.ByteBuf

@@ -1,5 +1,6 @@
 package com.jacobtread.blaze
 
+import com.jacobtread.blaze.logging.PacketLogger
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import io.netty.buffer.Unpooled
 import java.nio.file.Files

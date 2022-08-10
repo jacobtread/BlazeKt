@@ -1,6 +1,6 @@
 package com.jacobtread.blaze.tdf.types
 
-import com.jacobtread.blaze.PacketLogger
+import com.jacobtread.blaze.logging.PacketLogger
 import com.jacobtread.blaze.TdfContainer
 import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.TdfReadable

@@ -1,9 +1,7 @@
-package com.jacobtread.blaze
+package com.jacobtread.blaze.logging
 
-import com.jacobtread.blaze.PacketLogger.init
+import com.jacobtread.blaze.logging.PacketLogger.init
 import com.jacobtread.blaze.data.VarTriple
-import com.jacobtread.blaze.debug.BlazeLoggingConfig
-import com.jacobtread.blaze.debug.DebugNaming
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.Tdf
@@ -29,7 +27,7 @@ object PacketLogger {
     private var debugCommandNames: Map<Int, String>? = null
     private var debugNotifyNames: Map<Int, String>? = null
 
-    var output: BlazeLoggingOutput? = null
+    var handler: BlazeLoggingHandler? = null
 
     var isEnabled: Boolean = false
 
@@ -38,18 +36,15 @@ object PacketLogger {
      * configuration and logging output pipe. This enables
      * logging through this logger.
      *
-     * @param naming The naming to use for packet commands and components
-     * @param output The logging output pipe
+     * @param handler The handler for retrieving the debug command names and doing logging
      */
-    fun init(
-        naming: DebugNaming,
-        output: BlazeLoggingOutput?,
-    ) {
-        debugComponentNames = naming.getComponentNames()
-        debugCommandNames = naming.getCommandNames()
-        debugNotifyNames = naming.getNotifyNames()
-
-        this.output = output
+    fun init(handler: BlazeLoggingHandler?, ) {
+        if (handler != null) {
+            debugComponentNames = handler.getComponentNames()
+            debugCommandNames = handler.getCommandNames()
+            debugNotifyNames = handler.getNotifyNames()
+        }
+        PacketLogger.handler = handler
         isEnabled = true
     }
 
@@ -66,7 +61,7 @@ object PacketLogger {
     }
 
     /**
-     * Logs a packet to the debug output using the provided [output]
+     * Logs a packet to the debug output using the provided [handler]
      * logging pipe.
      *
      * @param title The title of the message to log
@@ -94,7 +89,7 @@ object PacketLogger {
                 out.append('=')
             }
             out.appendLine()
-            output?.debug(out.toString())
+            handler?.debug(out.toString())
         } catch (e: Throwable) {
             dumpPacketException(packet, e)
         }
@@ -186,9 +181,9 @@ object PacketLogger {
 
             out.appendLine()
                 .appendLine("=====================================================")
-            output?.warn(out.toString())
+            handler?.warn(out.toString())
         } catch (e: Throwable) {
-            output?.warn("Exception when handling packet dump exception", e)
+            handler?.warn("Exception when handling packet dump exception", e)
         }
     }
 
@@ -511,7 +506,7 @@ object PacketLogger {
      * @param text The error text
      */
     fun error(text: String) {
-        output?.error(text)
+        handler?.error(text)
     }
 
     /**
@@ -522,6 +517,6 @@ object PacketLogger {
      * @param cause The thrown exception
      */
     fun error(text: String, cause: Throwable) {
-        output?.error(text, cause)
+        handler?.error(text, cause)
     }
 }
