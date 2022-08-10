@@ -76,12 +76,13 @@ class PacketHandler : ChannelDuplexHandler() {
                     msg.writeContent(this)
                 }
 
-                ctx.flush()
                 if (PacketLogger.isEnabled) {
                     PacketLogger.log("ENCODED PACKET", ctx.channel(), msg)
                 }
+
                 if (buffer.isReadable) {
                     ctx.write(buffer, promise)
+                    ctx.flush()
                 }
                 buffer = null
             } finally {

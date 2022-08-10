@@ -27,7 +27,6 @@ internal class TdfTest {
     @Test
     fun `test varint`() = testTdfIterations(VarIntTdfGen)
 
-
     /**
      * test string Tests the string encoding against
      * a randomized string between 0 and 1000 characters
