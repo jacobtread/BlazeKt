@@ -112,7 +112,7 @@ inline fun TdfContainer.ushort(label: String): UShort = varInt(label).toUShort()
 
 inline fun TdfContainer.float(label: String): Float = getValue(FloatTdf::class.java, label)
 inline fun TdfContainer.blob(label: String): ByteArray = getValue(BlobTdf::class.java, label)
-inline fun TdfContainer.unionValue(label: String): Tdf<*>? = getValue(OptionalTdf::class.java, label)
+inline fun TdfContainer.optionalValue(label: String): Tdf<*>? = getValue(OptionalTdf::class.java, label)
 inline fun TdfContainer.triple(label: String): VarTriple = getValue(TrippleTdf::class.java, label)
 inline fun TdfContainer.pair(label: String): VarPair = getValue(PairTdf::class.java, label)
 inline fun TdfContainer.varIntList(label: String): List<ULong> = getValue(VarIntListTdf::class.java, label)
