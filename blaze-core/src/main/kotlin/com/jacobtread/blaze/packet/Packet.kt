@@ -1,8 +1,12 @@
 package com.jacobtread.blaze.packet
 
 import com.jacobtread.blaze.TdfContainer
+import com.jacobtread.blaze.handler.PacketDecoder
+import com.jacobtread.blaze.handler.PacketEncoder
 import com.jacobtread.blaze.tdf.Tdf
 import io.netty.buffer.ByteBuf
+import io.netty.channel.Channel
+import io.netty.handler.ssl.SslContext
 
 /**
  * Represents a network packet which can be sent and received.
@@ -116,5 +120,24 @@ interface Packet : TdfContainer {
          * @return The created weak reference
          */
         fun getWeakReference(packet: Packet): WeakPacketRef = WeakPacketRef(packet)
+
+        /**
+         * Append the required decoding and encoding
+         * handlers to the provided channel.
+         *
+         * Optionally if an [SslContext] is provided the
+         * SSL handler will be added as well
+         *
+         * @receiver The channel to append the handlers too
+         * @param sslContext Optional ssl context for secure
+         */
+        fun Channel.addPacketHandlers(sslContext: SslContext? = null) {
+            val pipeline = pipeline()
+                .addFirst(PacketDecoder())
+                .addLast(PacketEncoder)
+            if (sslContext != null) {
+                pipeline.addFirst(sslContext.newHandler(alloc()))
+            }
+        }
     }
 }
