@@ -1,12 +1,15 @@
 package com.jacobtread.blaze.logging
 
-import com.jacobtread.blaze.logging.PacketLogger.init
 import com.jacobtread.blaze.data.VarTriple
+import com.jacobtread.blaze.logging.PacketLogger.init
 import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import com.jacobtread.blaze.tdf.Tdf
 import com.jacobtread.blaze.tdf.types.*
 import io.netty.channel.Channel
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelPromise
 import io.netty.util.AttributeKey
 
 /**
@@ -22,6 +25,7 @@ object PacketLogger {
      * used for extra logging information while decoding / encoding packets
      */
     private val PACKET_CONTEXT_KEY: AttributeKey<String> = AttributeKey.newInstance("PacketContext")
+    private val PACKET_LOGGING_KEY: AttributeKey<Boolean> = AttributeKey.newInstance("PacketLogging")
 
     private var debugComponentNames: Map<Int, String>? = null
     private var debugCommandNames: Map<Int, String>? = null
@@ -31,6 +35,7 @@ object PacketLogger {
 
     var isEnabled: Boolean = false
 
+
     /**
      * Initialize the logger with the provided naming
      * configuration and logging output pipe. This enables
@@ -38,7 +43,7 @@ object PacketLogger {
      *
      * @param handler The handler for retrieving the debug command names and doing logging
      */
-    fun init(handler: BlazeLoggingHandler?, ) {
+    fun init(handler: BlazeLoggingHandler?) {
         if (handler != null) {
             debugComponentNames = handler.getComponentNames()
             debugCommandNames = handler.getCommandNames()
@@ -60,6 +65,11 @@ object PacketLogger {
             .set(value)
     }
 
+    fun setEnabled(channel: Channel, value: Boolean) {
+        channel.attr(PACKET_LOGGING_KEY)
+            .set(value)
+    }
+
     /**
      * Logs a packet to the debug output using the provided [handler]
      * logging pipe.
@@ -70,6 +80,9 @@ object PacketLogger {
      */
     fun log(title: String, channel: Channel, packet: Packet) {
         try {
+            val loggingEnabled = channel.attr(PACKET_LOGGING_KEY)
+                .get()
+            if (loggingEnabled != true) return
             val lineWidth = 30
             val out = StringBuilder()
             out.append(title)
@@ -132,10 +145,10 @@ object PacketLogger {
                 .append("Type: ")
                 .append(
                     when (packet.type) {
-                        Packet.REQUEST_TYPE -> "INCOMING"
-                        Packet.ERROR_TYPE -> "ERROR"
-                        Packet.NOTIFY_TYPE -> "NOTIFY"
-                        Packet.RESPONSE_TYPE -> "RESPONSE"
+                        Packet.REQUEST_TYPE -> "REQUEST_TYPE"
+                        Packet.ERROR_TYPE -> "ERROR_TYPE"
+                        Packet.NOTIFY_TYPE -> "NOTIFY_TYPE"
+                        Packet.RESPONSE_TYPE -> "RESPONSE_TYPE"
                         else -> "UNKNOWN"
                     }
                 )
@@ -230,7 +243,7 @@ object PacketLogger {
         out.append(", ")
 
         when (packet.type) {
-            Packet.REQUEST_TYPE -> out.append("INCOMING_TYPE")
+            Packet.REQUEST_TYPE -> out.append("REQUEST_TYPE")
             Packet.RESPONSE_TYPE -> out.append("RESPONSE_TYPE")
             Packet.NOTIFY_TYPE -> out.append("NOTIFY_TYPE")
             Packet.ERROR_TYPE -> out.append("ERROR_TYPE")

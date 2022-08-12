@@ -1,6 +1,7 @@
 package com.jacobtread.blaze.handler
 
 import com.jacobtread.blaze.logging.PacketLogger
+import com.jacobtread.blaze.packet.LazyBufferPacket
 import com.jacobtread.blaze.packet.Packet
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
@@ -35,44 +36,37 @@ object PacketEncoder : ChannelOutboundHandlerAdapter() {
      * @param promise The channel promise
      */
     override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
-        if (msg is Packet) {
-            // The buffer which needs to be released
-            var buffer: ByteBuf? = null
-            try {
-                val contentSize = msg.computeContentSize()
-                val isExtended = contentSize > 0xFFFF
-                val bufferSize = 12 + contentSize + (if (isExtended) 2 else 0)
-                buffer = ctx.alloc().ioBuffer(bufferSize, bufferSize)
-
-                with(buffer) {
-                    writeShort(contentSize) // Length of the packet content
-                    writeShort(msg.component) // Packet component value
-                    writeShort(msg.command) // Packet command value
-                    writeShort(msg.error) // Packet error value
-                    writeByte(msg.type shr 8) // Packet type value
-                    writeByte(if (isExtended) 0x10 else 0x00) // Whether the packet is extended
-                    writeShort(msg.id) // Packet id
-                    if (isExtended) {
-                        writeByte(((contentSize.toLong() and 0xFF000000) shr 24).toInt())
-                        writeByte((contentSize and 0x00FF0000) shr 16)
-                    }
-                    msg.writeContent(this)
-                }
-
-                if (PacketLogger.isEnabled) {
-                    PacketLogger.log("ENCODED PACKET", ctx.channel(), msg)
-                }
-
-                if (buffer.isReadable) {
-                    ctx.write(buffer, promise)
-                    ctx.flush()
-                }
-                buffer = null
-            } finally {
-                buffer?.release()
+        if (msg is Packet) { // Handle Packets
+            val contentSize = msg.computeContentSize()
+            val isExtended = contentSize > 0xFFFF
+            val bufferSize = 12 + contentSize + (if (isExtended) 2 else 0)
+            // Allocate a buffer for the packet size
+            val buffer: ByteBuf = ctx.alloc()
+                .ioBuffer(bufferSize, bufferSize)
+            buffer.writeShort(contentSize) // Length of the packet content
+            buffer.writeShort(msg.component) // Packet component value
+            buffer.writeShort(msg.command) // Packet command value
+            buffer.writeShort(msg.error) // Packet error value
+            buffer.writeByte(msg.type shr 8) // Packet type value
+            buffer.writeByte(if (isExtended) 0x10 else 0x00) // Whether the packet is extended
+            buffer.writeShort(msg.id) // Packet id
+            if (isExtended) {
+                buffer.writeByte(((contentSize.toLong() and 0xFF000000) shr 24).toInt())
+                buffer.writeByte((contentSize and 0x00FF0000) shr 16)
             }
-        } else {
-            super.write(ctx, msg, promise)
+
+            // Write the packet contents
+            msg.writeContent(buffer)
+            ctx.flush()
+            // Log the encoded packet
+            if (PacketLogger.isEnabled) {
+                PacketLogger.log("ENCODED PACKET", ctx.channel(), msg)
+            }
+            // Write the packet buffer
+            ctx.write(buffer, promise)
+            ctx.flush()
+        } else { // Write everything else back again
+            ctx.write(msg, promise)
         }
     }
 }

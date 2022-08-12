@@ -6,6 +6,7 @@ import com.jacobtread.blaze.handler.PacketEncoder
 import com.jacobtread.blaze.tdf.Tdf
 import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
+import io.netty.channel.ChannelPipeline
 import io.netty.handler.ssl.SslContext
 
 /**
@@ -38,17 +39,30 @@ interface Packet : TdfContainer {
      * would need to be to fit the contents of this
      * packet.
      *
+     * Default implementation calculates the size of
+     * all of its children. [LazyBufferPacket] just
+     * returns the size of its buffer.
+     *
      * @return The size in bytes the buffer needs to be
      */
-    fun computeContentSize(): Int
+    fun computeContentSize(): Int {
+        return content.sumOf { it.computeFullSize() }
+    }
 
     /**
      * Handles writing the contents of this packet
      * to the provided output buffer.
      *
+     * Default implementation iterates the content
+     * list and writes the values. [LazyBufferPacket]
+     * modifies this implementation to directly copy
+     * its underlying buffer.
+     *
      * @param out The buffer to write to
      */
-    fun writeContent(out: ByteBuf)
+    fun writeContent(out: ByteBuf) {
+        content.forEach { it.writeFully(out) }
+    }
 
     /**
      * Implementation for [TdfContainer] to find a tdf from the
@@ -130,14 +144,16 @@ interface Packet : TdfContainer {
          *
          * @receiver The channel to append the handlers too
          * @param sslContext Optional ssl context for secure
+         * @return The channel pipeline the handlers were added to
          */
-        fun Channel.addPacketHandlers(sslContext: SslContext? = null) {
+        fun Channel.addPacketHandlers(sslContext: SslContext? = null): ChannelPipeline {
             val pipeline = pipeline()
-                .addFirst(PacketDecoder())
-                .addLast(PacketEncoder)
+                .addFirst("encoder", PacketEncoder)
+                .addFirst("decoder", PacketDecoder())
             if (sslContext != null) {
-                pipeline.addFirst(sslContext.newHandler(alloc()))
+                pipeline.addFirst("ssl", sslContext.newHandler(alloc()))
             }
+            return pipeline
         }
     }
 }
