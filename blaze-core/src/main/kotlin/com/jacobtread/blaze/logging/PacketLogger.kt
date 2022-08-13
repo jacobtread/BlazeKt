@@ -514,7 +514,7 @@ object PacketLogger {
 
     /**
      * Logs an error without an exception to
-     * the logging pipe
+     * the logging handler
      *
      * @param text The error text
      */
@@ -524,12 +524,21 @@ object PacketLogger {
 
     /**
      * Logs and error with an exception to
-     * the logging pipe
+     * the logging handler
      *
      * @param text The error text
      * @param cause The thrown exception
      */
     fun error(text: String, cause: Throwable) {
         handler?.error(text, cause)
+    }
+
+    /**
+     * Logs a debug message to the logging handler
+     *
+     * @param text The debug text
+     */
+    fun debug(text: String) {
+        handler?.debug(text)
     }
 }
