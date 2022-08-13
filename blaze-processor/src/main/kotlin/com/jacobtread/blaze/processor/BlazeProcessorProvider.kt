@@ -1,10 +1,10 @@
 @file:JvmName("BlazeProcessorProvider")
+
 package com.jacobtread.blaze.processor
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
-import com.jacobtread.blaze.processor.BlazeProcessor
 
 /**
  * BlazeProcessorProvider Provides an instance of the BlazeProcessor
